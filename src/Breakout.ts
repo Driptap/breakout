@@ -55,7 +55,6 @@ export default class Breakout {
   private domListeners: DomListeners;
   private modifiers: Modifiers;
   private bricks: Bricks;
-
   private gameLoopInterval: any;
 
   public constructor(
@@ -68,21 +67,16 @@ export default class Breakout {
     this.sound = new Sound();
     this.domListeners = new DomListeners(state, canvas);
     this.modifiers = new Modifiers(state);
-    this.bricks = new Bricks(state, this.levels, this.modifiers, this.sound);
   }
 
   public start() {
-    this.state.brickWidth =
-      (this.canvas.width - this.state.brickOffsetLeft * 2) /
-        this.levels.current.brickColumnCount -
-      this.state.brickPadding;
-    this.state.score = 0;
-    this.state.level = this.levels.currentNumber;
-    this.state.x = this.canvas.width / 2;
-    this.state.y = this.canvas.height - 30;
-    this.state.dx = this.state.speed;
-    this.state.dy = -this.state.speed;
-    this.state.paddleX = (this.canvas.width - this.state.paddleWidth) / 2;
+    this.bricks = new Bricks(
+      this.state,
+      this.levels,
+      this.modifiers,
+      this.sound
+    );
+    this.setupGameState();
 
     if (this.levels.complete) {
       this.ui.drawYouWin();
@@ -105,9 +99,10 @@ export default class Breakout {
 
   private loop = (): void => {
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    // updateSpeed();
+
     drawBall(this.context, this.state);
     drawPaddle(this.context, this.state, this.canvas);
+
     this.bricks.draw(this.context);
     this.ui.drawLives();
     this.ui.drawScore();
@@ -115,15 +110,8 @@ export default class Breakout {
 
     this.bricks.detectCollisions();
 
-    if (
-      this.state.brickSmashCount ===
-      this.levels.current.brickColumnCount * this.levels.current.brickRowCount
-    ) {
-      this.levels.completedCurrent();
-      this.state.brickSmashCount = 0;
-      this.state.lives += 1;
-      clearInterval(this.gameLoopInterval);
-      this.start();
+    if (this.smashedBricksCheck()) {
+      this.levelUp();
     }
 
     // Move paddle
@@ -141,46 +129,81 @@ export default class Breakout {
       }
     }
 
-    // game over
-    if (
-      this.state.y + this.state.dy >
-      this.canvas.height - this.state.ballRadius
-    ) {
-      if (
-        this.state.x > this.state.paddleX + 2 &&
-        this.state.x < this.state.paddleX + this.state.paddleWidth + 2
-      ) {
+    if (this.bottomEdgeCollisionCheck()) {
+      if (this.paddleCollisionCheck()) {
         this.state.dy = -this.state.dy;
       } else {
-        if (this.state.lives !== 0) {
-          this.state.lives = this.state.lives - 1;
-          this.state.x = this.canvas.width / 2;
-          this.state.y = this.canvas.height - 30;
-          this.state.speed = DEFAULT_SPEED;
-
-          this.sound.looseALife();
-          this.state.paddleX = (this.canvas.width - this.state.paddleWidth) / 2;
-        } else {
-          this.stop();
-          this.ui.drawGameOver();
-        }
+        this.looseALife();
       }
     }
 
     // bottom and top edge collision
-    if (this.state.y + this.state.dy < this.state.ballRadius) {
+    if (this.topEdgeCollisionCheck()) {
       this.state.dy = -this.state.dy;
     }
 
     // left and right edge collision
-    if (
-      this.state.x + this.state.dx < this.state.ballRadius ||
-      this.state.x + this.state.dx > this.canvas.width - this.state.ballRadius
-    ) {
+    if (this.sideEdgeCollisionCheck()) {
       this.state.dx = -this.state.dx;
     }
 
     this.state.y += this.state.dy;
     this.state.x += this.state.dx;
   };
+
+  private smashedBricksCheck = () =>
+    this.state.brickSmashCount ===
+    this.levels.current.brickColumnCount * this.levels.current.brickRowCount;
+
+  private paddleCollisionCheck = () =>
+    this.state.x > this.state.paddleX + 2 &&
+    this.state.x < this.state.paddleX + this.state.paddleWidth + 2;
+
+  private bottomEdgeCollisionCheck = () =>
+    this.state.y + this.state.dy > this.canvas.height - this.state.ballRadius;
+
+  private topEdgeCollisionCheck = () =>
+    this.state.y + this.state.dy < this.state.ballRadius;
+
+  private sideEdgeCollisionCheck = () =>
+    this.state.x + this.state.dx < this.state.ballRadius ||
+    this.state.x + this.state.dx > this.canvas.width - this.state.ballRadius;
+
+  private setupGameState = () => {
+    this.state.brickWidth =
+      (this.canvas.width - this.state.brickOffsetLeft * 2) /
+        this.levels.current.brickColumnCount -
+      this.state.brickPadding;
+    this.state.score = 0;
+    this.state.level = this.levels.currentNumber;
+    this.state.x = this.canvas.width / 2;
+    this.state.y = this.canvas.height - 30;
+    this.state.dx = this.state.speed;
+    this.state.dy = -this.state.speed;
+    this.state.paddleX = (this.canvas.width - this.state.paddleWidth) / 2;
+  };
+
+  private levelUp() {
+    this.levels.completedCurrent();
+    this.state.brickSmashCount = 0;
+    this.state.lives += 1;
+    clearInterval(this.gameLoopInterval);
+    this.ui.drawLevelUp();
+    setTimeout(() => this.start(), 1000);
+  }
+
+  private looseALife() {
+    if (this.state.lives !== 0) {
+      this.state.lives = this.state.lives - 1;
+      this.state.x = this.canvas.width / 2;
+      this.state.y = this.canvas.height - 30;
+      this.state.speed = DEFAULT_SPEED;
+
+      this.sound.looseALife();
+      this.state.paddleX = (this.canvas.width - this.state.paddleWidth) / 2;
+    } else {
+      this.stop();
+      this.ui.drawGameOver();
+    }
+  }
 }

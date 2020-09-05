@@ -39,7 +39,7 @@ export default class Ui {
     );
   }
 
-  startButtonRect: Rect = {
+  startButtonRect = {
     x: this.canvas.width / 2 - 100,
     y: this.canvas.height / 2 - 50,
     width: 200,
@@ -110,6 +110,21 @@ export default class Ui {
     this.context.fillStyle = "#0095DD";
     this.context.fillText(
       "YOU WIN!, You scored: " + this.state.score * this.state.lives,
+      this.canvas.width / 3.7,
+      this.canvas.height / 4
+    );
+    this.context.textAlign = "center";
+    this.context.textBaseline = "middle";
+  }
+
+  drawLevelUp() {
+    if (!this.context) {
+      return;
+    }
+    this.context.font = "100px Arial";
+    this.context.fillStyle = "#0095DD";
+    this.context.fillText(
+      "LEVEL UP!",
       this.canvas.width / 3.7,
       this.canvas.height / 4
     );
