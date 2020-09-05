@@ -25,3 +25,14 @@ export function isInside(pos: Position, rect: Rect): boolean {
     pos.y > rect.y
   );
 }
+
+export function getMousePos(
+  e: MouseEvent,
+  canvas: HTMLCanvasElement
+): Position {
+  var rect = canvas.getBoundingClientRect();
+  return {
+    x: e.clientX - rect.left,
+    y: e.clientY - rect.top,
+  };
+}
