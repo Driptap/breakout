@@ -1,0 +1,33 @@
+html, body, #root, .App {
+  height: 100%;
+}
+
+.App {
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  height: 2rem;
+}
+
+main {
+  flex-grow: 1;
+  display: flex;
+}
+
+main > canvas {
+  flex-grow: 1;
+}
+
+h1 {
+  font-size: 230px;
+  text-align: center;
+  background: -webkit-linear-gradient(#eee, #333);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  position: absolute;
+  width: 100%;
+  flex-grow: 1;
+}
+
