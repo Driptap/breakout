@@ -1,3 +1,5 @@
+import planck from "planck-js";
+
 import Sound from "./lib/Sound";
 import Levels from "./lib/Levels";
 import State from "./lib/State";
@@ -64,7 +66,8 @@ export default class Breakout {
     this.centerBallAndPaddle();
     this.ui.drawLevelStart();
     setTimeout(() => {
-      this.gameLoopInterval = setInterval(this.loop, 10);
+      this.state.loop = true;
+      this.gameLoopInterval = window.requestAnimationFrame(this.loop);
     }, 1000);
   }
 
@@ -123,6 +126,10 @@ export default class Breakout {
 
     this.state.y += this.state.dy;
     this.state.x += this.state.dx;
+
+    if (this.state.loop) {
+      window.requestAnimationFrame(this.loop);
+    }
   };
 
   private smashedBricksCheck = () =>
@@ -144,7 +151,7 @@ export default class Breakout {
     this.state.x + this.state.dx > this.canvas.width - this.state.ballRadius;
 
   private levelUp() {
-    clearInterval(this.gameLoopInterval);
+    this.state.loop = false;
     this.levels.completedCurrent();
     this.state.lives += 1;
     this.state.brickWidth =
@@ -160,13 +167,14 @@ export default class Breakout {
 
   private looseALife() {
     if (this.state.lives !== 0) {
-      clearInterval(this.gameLoopInterval);
+      this.state.loop = false;
       this.state.lives = this.state.lives - 1;
       this.sound.looseALife();
       this.ui.drawLostALife();
       this.centerBallAndPaddle();
       setTimeout(() => {
-        this.gameLoopInterval = setInterval(this.loop, 10);
+        this.state.loop = true;
+        this.gameLoopInterval = window.requestAnimationFrame(this.loop);
       }, 1000);
     } else {
       this.gameOver();
@@ -184,7 +192,7 @@ export default class Breakout {
   }
 
   private gameOver(): void {
-    this.gameLoopInterval && clearInterval(this.gameLoopInterval);
+    this.state.loop = false;
     window.dispatchEvent(new CustomEvent("Breakout:stopped"));
   }
 }

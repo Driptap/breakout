@@ -20,7 +20,8 @@ export default class State {
         public brickPadding: number,
         public brickHeight: number,
         public brickWidth: number,
-        public lives: number
+        public lives: number,
+        public loop: boolean
     ) {}
 
     public setBallSpeed(speed: number) {

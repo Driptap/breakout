@@ -53,7 +53,8 @@ const state = new State(
   10, //brickPadding
   50, //brickHeight
   (canvas.width - 30 * 2) / levels.current.brickColumnCount - 10, //brickWidth
-  3 //lives
+  3, //lives
+  false
 );
 
 const ui = new Ui(state, canvas, levels);

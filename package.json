@@ -29,5 +29,8 @@
     "setupFiles": [
       "jest-canvas-mock"
     ]
+  },
+  "dependencies": {
+    "planck-js": "^0.3.22"
   }
 }
