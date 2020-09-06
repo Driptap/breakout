@@ -46,7 +46,8 @@ export default class Breakout {
       this.state,
       this.levels,
       this.modifiers,
-      this.sound
+      this.sound,
+      this.context
     );
     this.state.brickWidth =
       (this.canvas.width - this.state.brickOffsetLeft * 2) /
@@ -75,7 +76,8 @@ export default class Breakout {
 
     this.paddle.draw();
     this.ball.draw();
-    this.bricks.draw(this.context);
+    this.bricks.draw();
+
     this.ui.drawLives();
     this.ui.drawScore();
     this.ui.drawLevel();

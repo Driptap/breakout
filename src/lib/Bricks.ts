@@ -20,7 +20,8 @@ export default class Bricks {
     private readonly state: State,
     private readonly levels: Levels,
     private readonly modifiers: Modifiers,
-    private readonly sound: Sound
+    private readonly sound: Sound,
+    private readonly context: CanvasRenderingContext2D
   ) {
     const { brickRowCount, brickColumnCount } = levels.current;
     for (var c = 0; c < brickColumnCount; c++) {
@@ -35,7 +36,7 @@ export default class Bricks {
     }
   }
 
-  public draw(ctx: CanvasRenderingContext2D) {
+  public draw() {
     const { brickRowCount, brickColumnCount } = this.levels.current;
     for (let c = 0; c < brickColumnCount; c++) {
       for (let r = 0; r < brickRowCount; r++) {
@@ -50,19 +51,19 @@ export default class Bricks {
           this.bricks[c][r].x = brickX;
           this.bricks[c][r].y = brickY;
 
-          ctx.fillStyle = this.bricks[c][r].colour;
-          ctx.beginPath();
-          ctx.rect(
+          this.context.fillStyle = this.bricks[c][r].colour;
+          this.context.beginPath();
+          this.context.rect(
             brickX,
             brickY,
             this.state.brickWidth,
             this.state.brickHeight
           );
-          ctx.fill();
+          this.context.fill();
 
           const modifier = this.bricks[c][r].modifier;
           if (modifier !== undefined) {
-            ctx.drawImage(
+            this.context.drawImage(
               this.modifiers.icon(modifier),
               brickX + 5,
               brickY + 5,
@@ -70,7 +71,7 @@ export default class Bricks {
               this.state.brickHeight - 10
             );
           }
-          ctx.closePath();
+          this.context.closePath();
         }
       }
     }
