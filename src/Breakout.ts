@@ -5,6 +5,9 @@ import DomListeners from "./lib/DomListeners";
 import Modifiers from "./lib/Modifiers";
 import Bricks from "./lib/Bricks";
 import Ui from "./lib/Ui";
+import Ball from "./lib/Ball";
+import Paddle from "./lib/Paddle";
+import { DEFAULT_SPEED } from "./lib/constants";
 
 import {
   getRandomColor,
@@ -14,48 +17,15 @@ import {
   getMousePos,
 } from "./lib/utils";
 
-const DEFAULT_SPEED = 4;
-
-function drawBall(ctx: CanvasRenderingContext2D, state: State) {
-  if (!ctx) {
-    return;
-  }
-
-  ctx.beginPath();
-  ctx.arc(state.x, state.y, state.ballRadius, 0, Math.PI * 2);
-  ctx.fillStyle = "#0095DD";
-  ctx.fill();
-  ctx.closePath();
-}
-
-function drawPaddle(
-  ctx: CanvasRenderingContext2D,
-  state: State,
-  canvas: HTMLCanvasElement
-) {
-  if (!ctx) {
-    return;
-  }
-
-  ctx.beginPath();
-  ctx.rect(
-    state.paddleX,
-    canvas.height - state.paddleHeight,
-    state.paddleWidth,
-    state.paddleHeight
-  );
-  ctx.fillStyle = "#0095DD";
-  ctx.fill();
-  ctx.closePath();
-}
-
 export default class Breakout {
   private context: CanvasRenderingContext2D;
   private sound: Sound;
   private domListeners: DomListeners;
   private modifiers: Modifiers;
-  private bricks: Bricks;
+  private bricks?: Bricks;
   private gameLoopInterval: any;
+  private ball: Ball;
+  private paddle: Paddle;
 
   public constructor(
     private readonly state: State,
@@ -67,6 +37,8 @@ export default class Breakout {
     this.sound = new Sound();
     this.domListeners = new DomListeners(state, canvas);
     this.modifiers = new Modifiers(state);
+    this.ball = new Ball(this.state, this.context);
+    this.paddle = new Paddle(this.state, this.canvas);
   }
 
   public start() {
@@ -76,7 +48,10 @@ export default class Breakout {
       this.modifiers,
       this.sound
     );
-    this.setupGameState();
+    this.state.brickWidth =
+      (this.canvas.width - this.state.brickOffsetLeft * 2) /
+        this.levels.current.brickColumnCount -
+      this.state.brickPadding;
 
     if (this.levels.complete) {
       this.ui.drawYouWin();
@@ -85,24 +60,21 @@ export default class Breakout {
     }
 
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
+    this.centerBallAndPaddle();
     this.ui.drawLevelStart();
     setTimeout(() => {
       this.gameLoopInterval = setInterval(this.loop, 10);
     }, 1000);
   }
 
-  public stop(): void {
-    this.gameLoopInterval && clearInterval(this.gameLoopInterval);
-    window.dispatchEvent(new CustomEvent("Breakout:stopped"));
-  }
-
   private loop = (): void => {
+    if (!this.bricks) {
+      throw new Error("Bricks have not been generated!");
+    }
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-    drawBall(this.context, this.state);
-    drawPaddle(this.context, this.state, this.canvas);
-
+    this.paddle.draw();
+    this.ball.draw();
     this.bricks.draw(this.context);
     this.ui.drawLives();
     this.ui.drawScore();
@@ -169,41 +141,48 @@ export default class Breakout {
     this.state.x + this.state.dx < this.state.ballRadius ||
     this.state.x + this.state.dx > this.canvas.width - this.state.ballRadius;
 
-  private setupGameState = () => {
+  private levelUp() {
+    clearInterval(this.gameLoopInterval);
+    this.levels.completedCurrent();
+    this.state.lives += 1;
     this.state.brickWidth =
       (this.canvas.width - this.state.brickOffsetLeft * 2) /
         this.levels.current.brickColumnCount -
       this.state.brickPadding;
-    this.state.score = 0;
-    this.state.level = this.levels.currentNumber;
-    this.state.x = this.canvas.width / 2;
-    this.state.y = this.canvas.height - 30;
-    this.state.dx = this.state.speed;
-    this.state.dy = -this.state.speed;
-    this.state.paddleX = (this.canvas.width - this.state.paddleWidth) / 2;
-  };
 
-  private levelUp() {
-    this.levels.completedCurrent();
+    this.centerBallAndPaddle();
     this.state.brickSmashCount = 0;
-    this.state.lives += 1;
-    clearInterval(this.gameLoopInterval);
     this.ui.drawLevelUp();
     setTimeout(() => this.start(), 1000);
   }
 
   private looseALife() {
     if (this.state.lives !== 0) {
+      clearInterval(this.gameLoopInterval);
       this.state.lives = this.state.lives - 1;
-      this.state.x = this.canvas.width / 2;
-      this.state.y = this.canvas.height - 30;
-      this.state.speed = DEFAULT_SPEED;
-
       this.sound.looseALife();
-      this.state.paddleX = (this.canvas.width - this.state.paddleWidth) / 2;
+      this.ui.drawLostALife();
+      this.centerBallAndPaddle();
+      setTimeout(() => {
+        this.gameLoopInterval = setInterval(this.loop, 10);
+      }, 1000);
     } else {
-      this.stop();
+      this.gameOver();
       this.ui.drawGameOver();
     }
+  }
+
+  public centerBallAndPaddle() {
+    this.state.paddleX = (this.canvas.width - this.state.paddleWidth) / 2;
+    this.state.x = this.canvas.width / 2;
+    this.state.y = this.canvas.height - 50;
+    this.state.dx = -DEFAULT_SPEED;
+    this.state.dy = -DEFAULT_SPEED;
+    this.state.setBallSpeed(DEFAULT_SPEED);
+  }
+
+  private gameOver(): void {
+    this.gameLoopInterval && clearInterval(this.gameLoopInterval);
+    window.dispatchEvent(new CustomEvent("Breakout:stopped"));
   }
 }

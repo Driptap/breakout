@@ -1,29 +1,40 @@
-export default class State {
-  public constructor(
-    public defaultSpeed,
-    public level,
-    public score,
-    public brickSmashCount,
-    public rightPressed,
-    public leftPressed,
-    public paddleHeight,
-    public paddleWidth,
-    public paddleX,
-    public ballRadius,
-    public speed,
-    public dx,
-    public dy,
-    public x,
-    public y,
-    public brickOffsetTop,
-    public brickOffsetLeft,
-    public brickPadding,
-    public brickHeight,
-    public brickWidth,
-    public lives
-  ) {}
+import { MAX_SPEED } from "./constants";
 
-  public setPaddleX(paddleX: number) {
-    this.paddleX = paddleX;
-  }
+export default class State {
+    public constructor(
+        public score: number,
+        public brickSmashCount: number,
+        public rightPressed: boolean,
+        public leftPressed: boolean,
+        public paddleHeight: number,
+        public paddleWidth: number,
+        public paddleX: number,
+        public ballRadius: number,
+        public speed: number,
+        public dx: number,
+        public dy: number,
+        public x: number,
+        public y: number,
+        public brickOffsetTop: number,
+        public brickOffsetLeft: number,
+        public brickPadding: number,
+        public brickHeight: number,
+        public brickWidth: number,
+        public lives: number
+    ) {}
+
+    public setBallSpeed(speed: number) {
+        this.speed = speed > MAX_SPEED ? MAX_SPEED : speed;
+        if (this.dx < 0) {
+            this.dx = -this.speed;
+        } else {
+            this.dx = this.speed;
+        }
+
+        if (this.dy < 0) {
+            this.dy = -this.speed;
+        } else {
+            this.dy = this.speed;
+        }
+    }
 }

@@ -1,15 +1,18 @@
 import State from "./State";
+import Levels from "./Levels";
 
 export default class Ui {
-  private readonly context: CanvasRenderingContext2Dn;
-  constructor(
+  private readonly context: CanvasRenderingContext2D;
+
+  public constructor(
     private readonly state: State,
-    private readonly canvas: HTMLCanvasElement
+    private readonly canvas: HTMLCanvasElement,
+    private readonly levels: Levels
   ) {
-    this.context = canvas.getContext("2d");
+    this.context = canvas.getContext("2d") as CanvasRenderingContext2D;
   }
 
-  drawLives() {
+  public drawLives() {
     this.context.font = "16px Arial";
     this.context.fillStyle = "#0095DD";
     this.context.fillText(
@@ -19,7 +22,7 @@ export default class Ui {
     );
   }
 
-  drawScore() {
+  public drawScore() {
     this.context.font = "16px Arial";
     this.context.fillStyle = "#0095DD";
     this.context.fillText(
@@ -29,24 +32,24 @@ export default class Ui {
     );
   }
 
-  drawLevel() {
+  public drawLevel() {
     this.context.font = "16px Arial";
     this.context.fillStyle = "#0095DD";
     this.context.fillText(
-      "Level: " + this.state.level,
+      "Level: " + this.levels.currentNumber,
       this.canvas.width - 230,
       20
     );
   }
 
-  startButtonRect = {
+  public startButtonRect = {
     x: this.canvas.width / 2 - 100,
     y: this.canvas.height / 2 - 50,
     width: 200,
     height: 100,
   };
 
-  drawStartButton() {
+  public drawStartButton() {
     this.context.beginPath();
     const { x, y, width, height } = this.startButtonRect;
     this.context.rect(x, y, width, height);
@@ -63,7 +66,7 @@ export default class Ui {
     this.context.textBaseline = "middle";
   }
 
-  drawTitle() {
+  public drawTitle() {
     if (!this.context) {
       return;
     }
@@ -78,7 +81,7 @@ export default class Ui {
     this.context.textBaseline = "middle";
   }
 
-  drawGameOver() {
+  public drawGameOver() {
     this.context.font = "100px Arial";
     this.context.fillStyle = "#0095DD";
     this.context.fillText(
@@ -90,11 +93,11 @@ export default class Ui {
     this.context.textBaseline = "middle";
   }
 
-  drawLevelStart() {
+  public drawLevelStart() {
     this.context.font = "100px Arial";
     this.context.fillStyle = "#0095DD";
     this.context.fillText(
-      "Level: " + this.state.level,
+      "Level: " + this.levels.currentNumber,
       this.canvas.width / 3.7,
       this.canvas.height / 4
     );
@@ -102,7 +105,7 @@ export default class Ui {
     this.context.textBaseline = "middle";
   }
 
-  drawYouWin() {
+  public drawYouWin() {
     if (!this.context) {
       return;
     }
@@ -117,7 +120,7 @@ export default class Ui {
     this.context.textBaseline = "middle";
   }
 
-  drawLevelUp() {
+  public drawLevelUp() {
     if (!this.context) {
       return;
     }
@@ -125,6 +128,21 @@ export default class Ui {
     this.context.fillStyle = "#0095DD";
     this.context.fillText(
       "LEVEL UP!",
+      this.canvas.width / 3.7,
+      this.canvas.height / 4
+    );
+    this.context.textAlign = "center";
+    this.context.textBaseline = "middle";
+  }
+
+  public drawLostALife() {
+    if (!this.context) {
+      return;
+    }
+    this.context.font = "100px Arial";
+    this.context.fillStyle = "#0095DD";
+    this.context.fillText(
+      "LOST A LIFE!",
       this.canvas.width / 3.7,
       this.canvas.height / 4
     );

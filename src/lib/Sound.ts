@@ -11,28 +11,32 @@ export default class Sound {
   }
 
   public brickSmash() {
-    this.brickSmashOscillator.connect(this.ctx.destination);
-    setTimeout(
-      () => this.brickSmashOscillator.disconnect(this.ctx.destination),
-      25
-    );
+    try {
+      this.brickSmashOscillator.connect(this.ctx.destination);
+      setTimeout(
+        () => this.brickSmashOscillator.disconnect(this.ctx.destination),
+        25
+      );
+    } catch {}
   }
 
   public powerUp() {
-    this.powerUpOscillator.connect(this.ctx.destination);
-    setTimeout(() => {
-      this.powerUpOscillator.frequency.value = 475;
-    }, 20);
-    setTimeout(() => {
-      this.powerUpOscillator.frequency.value = 525;
-    }, 40);
-    setTimeout(() => {
-      this.powerUpOscillator.frequency.value = 625;
-    }, 60);
-    setTimeout(
-      () => this.powerUpOscillator.disconnect(this.ctx.destination),
-      75
-    );
+    try {
+      this.powerUpOscillator.connect(this.ctx.destination);
+      setTimeout(() => {
+        this.powerUpOscillator.frequency.value = 475;
+      }, 20);
+      setTimeout(() => {
+        this.powerUpOscillator.frequency.value = 525;
+      }, 40);
+      setTimeout(() => {
+        this.powerUpOscillator.frequency.value = 625;
+      }, 60);
+      setTimeout(
+        () => this.powerUpOscillator.disconnect(this.ctx.destination),
+        75
+      );
+    } catch {}
   }
 
   public looseALife() {
